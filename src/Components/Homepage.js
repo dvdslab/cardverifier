@@ -727,7 +727,7 @@ const InformationSection = ({ faqRef, purchaseOrValidateRef }) => {
             <Box width="100%" mt={10} py={4} textAlign="center">
             <Divider mb={4} />
             <Flex justify="space-between" px={4}>
-                <Text>© 2023 e-Cardly</Text>
+                <Text>© 2023 Active Gift Card Validator</Text>
                 <Text>All rights reserved.</Text>
             </Flex>
         </Box>
