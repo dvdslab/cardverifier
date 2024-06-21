@@ -1,4 +1,5 @@
 import { Link, useMatch, useResolvedPath, useNavigate } from "react-router-dom"
+import { Text } from "@chakra-ui/react";
 
 export default function Navbar({ informationSectionRef }) {
     const navigate = useNavigate();
@@ -12,7 +13,9 @@ export default function Navbar({ informationSectionRef }) {
     return (
         <nav className="nav">
             <Link to="/" className="site-title">
-                Card verifier
+                <Text fontSize={`2xl`}>
+                    Active Gift Card Validator
+                </Text>
             </Link>
             <ul>
                 <CustomLink to={"/"}>Home</CustomLink>

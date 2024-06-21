@@ -62,8 +62,8 @@ const ImageSection = () => {
                         Welcome to
                     </Text>{" "}
                     <Text as="span" color="white">
-                        <Text as="span" color="black" bg="white" px={4} py={2}>
-                            Card verifier
+                        <Text as="span" color="black" bg="white" px={4} py={2} fontSize={`5xl`}>
+                            Active Gift Card Validator
                         </Text>
                     </Text>
                 </Text>
