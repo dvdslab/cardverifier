@@ -713,16 +713,10 @@ const InformationSection = ({ faqRef, purchaseOrValidateRef }) => {
                 </Box>
                 <VStack spacing={4} align="stretch">
                     <Text fontSize="xl" fontWeight="bold">Explore</Text>
-                    <Link href="/about">
-                        <Text cursor="pointer" _hover={{ color: "blue.500" }}>About</Text>
-                    </Link>
-                    <Link href="/contact">
-                        <Text cursor="pointer" _hover={{ color: "blue.500" }}>Contact</Text>
-                    </Link>
+                    <Text cursor="pointer" _hover={{ color: "blue.500" }}>About</Text>
+                    <Text cursor="pointer" _hover={{ color: "blue.500" }}>Contact</Text>
                     <Text cursor="pointer" _hover={{ color: "blue.500" }} onClick={scrollToFAQ}>FAQ's</Text>
-                    <Link href="/privacy-policy">
-                        <Text cursor="pointer" _hover={{ color: "blue.500" }}>Privacy Policy</Text>
-                    </Link>
+                    <Text cursor="pointer" _hover={{ color: "blue.500" }}>Privacy Policy</Text>
                 </VStack>
                 <VStack spacing={4} align="stretch">
                     <Text fontSize="xl" fontWeight="bold">Actions</Text>
