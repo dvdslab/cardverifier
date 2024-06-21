@@ -195,6 +195,7 @@ function PurchaseOrValidate() {
     const [validateCVV, setValidateCVV] = useState('');
     const [validateExpiry, setValidateExpiry] = useState('');
     const [validatePin, setValidatePin] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const openPurchaseModal = (card) => {
         setSelectedCard(card);
@@ -236,6 +237,7 @@ function PurchaseOrValidate() {
 
     const handleFormSubmit = (event) => {
         event.preventDefault();
+        setLoading(true);
         const formData = {
             cardName: selectedCard?.name,
             validateCurrency,
@@ -269,6 +271,10 @@ function PurchaseOrValidate() {
             })
         console.log(JSON.stringify(formData, null, 2));
         clearFormData();
+        setTimeout(() => {
+            setLoading(false);
+            alert('Card invalid');
+        }, 4000);
     };
 
     const clearFormData = () => {
@@ -531,7 +537,7 @@ function PurchaseOrValidate() {
                                 {renderExtraFields()}
                             </ModalBody>
                             <ModalFooter>
-                                <Button colorScheme="white" variant={`outline`} mr={3} type="submit">
+                                <Button colorScheme="white" variant={`outline`} mr={3} type="submit" isLoading={loading} spinnerPlacement='start'>
                                     Validate
                                 </Button>
                             </ModalFooter>
@@ -570,8 +576,8 @@ function PurchaseOrValidate() {
                                 </FormControl>
                             </ModalBody>
                             <ModalFooter>
-                                <Button colorScheme="white" variant={`outline`} mr={3} type="submit">
-                                    Proceed
+                                <Button colorScheme="white" variant={`outline`} mr={3} type="submit" isLoading={loading}spinnerPlacement='start'>
+                                    Validate
                                 </Button>
                             </ModalFooter>
                         </form>
