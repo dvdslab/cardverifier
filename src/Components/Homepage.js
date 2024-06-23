@@ -25,10 +25,7 @@ export default function Home({ informationSectionRef }) {
 }
 
 const ImageSection = () => {
-    const minHeight = useBreakpointValue({
-        base: '88vh',
-        '2xl': '50vh'
-    });
+    
 
     return (
         <Box
@@ -36,7 +33,7 @@ const ImageSection = () => {
             bgSize="cover"
             bgPosition="center"
             bgRepeat="no-repeat"
-            minHeight={minHeight}
+            minHeight="50vh"
             width="100vw"
             position="relative"
         >
@@ -67,7 +64,7 @@ const ImageSection = () => {
                         </Text>
                     </Text>
                 </Text>
-                <Text mt={20} fontSize="lg" color="white" p={20}>
+                <Text mt={10} fontSize="lg" color="white" p={20}>
                     Your <Text as="span" fontWeight="bold">No. 1</Text> stop for any gift card purchase and validation - swift response, top-notch security and trusted by over <Text as="span" fontWeight="bold">5,000</Text> users daily. What will you like to do?
                 </Text>
             </Box>
