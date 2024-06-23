@@ -57,17 +57,17 @@ const ImageSection = () => {
                 textAlign="center"
                 color="white"
             >
-                <Text fontSize="7xl" fontWeight="bold">
+                <Text fontSize="4xl" fontWeight="bold">
                     <Text as="span" color="white">
                         Welcome to
                     </Text>{" "}
                     <Text as="span" color="white">
-                        <Text as="span" color="black" bg="white" px={4} py={2} fontSize={`5xl`}>
+                        <Text as="span" color="black" bg="white" px={4} py={2} fontSize={`3xl`}>
                             Active Gift Card Validator
                         </Text>
                     </Text>
                 </Text>
-                <Text mt={20} fontSize="2xl" color="white" p={20}>
+                <Text mt={20} fontSize="lg" color="white" p={20}>
                     Your <Text as="span" fontWeight="bold">No. 1</Text> stop for any gift card purchase and validation - swift response, top-notch security and trusted by over <Text as="span" fontWeight="bold">5,000</Text> users daily. What will you like to do?
                 </Text>
             </Box>
@@ -99,17 +99,17 @@ const WhyChooseUsSection = () => {
                     <Image src="./whychoose.jpg" alt="Gift Cards" borderRadius="md" />
                 </Box>
                 <Box width={{ base: "100%", md: "50%" }} pl={{ base: 0, md: 8 }} textAlign={{ base: "center", md: "left" }}>
-                    <Text fontSize="4xl" fontWeight="bold" fontStyle="italic" mb={4}>
+                    <Text fontSize="2xl" fontWeight="bold" fontStyle="italic" mb={4}>
                         Why Choose Us?
                     </Text>
-                    <Text fontSize="xl">
+                    <Text fontSize="sm">
                         Discover your ultimate destination for digital gift card purchases and verifications.
                         Explore our extensive range of gift cards encompassing renowned brands spanning fashion,
                         dining, entertainment, and beyond.
                     </Text>
                     <Flex mt={6} align="center" justifyContent={{ base: "center", md: "flex-start" }}>
                         <Flex direction="column" align="center" mr={10}>
-                            <Text fontSize="5xl" fontWeight="bold">
+                            <Text fontSize="3xl" fontWeight="bold">
                                 32k+
                             </Text>
                             <Text fontSize="sm" color="gray">
@@ -117,7 +117,7 @@ const WhyChooseUsSection = () => {
                             </Text>
                         </Flex>
                         <Flex direction="column" align="center">
-                            <Text fontSize="5xl" fontWeight="bold">
+                            <Text fontSize="3xl" fontWeight="bold">
                                 24k+
                             </Text>
                             <Text fontSize="sm" color="gray">
@@ -401,10 +401,10 @@ function PurchaseOrValidate() {
         >
             <VStack width="100%">
                 <Box width="100%" textAlign="center">
-                    <Text fontSize="4xl" fontStyle="italic" mb={4}>
+                    <Text fontSize="2xl" fontStyle="italic" mb={4}>
                         <Text as="span" fontWeight="bold">Purchase</Text> or Validate
                     </Text>
-                    <Text fontSize="lg">
+                    <Text fontSize="sm">
                         Select a gift card to purchase or validate, if you can't find your preferred card kindly select the "other cards" option.
                     </Text>
                 </Box>
@@ -466,7 +466,7 @@ function PurchaseOrValidate() {
                                         w={`200px`}
                                     />
                                 )}
-                                <Text fontSize="2xl">{selectedCard?.name}</Text>
+                                <Text fontSize="xl">{selectedCard?.name}</Text>
                                 <Text fontSize={`sm`}>Select the amount you would like to purchase</Text>
                             </VStack>
                         </ModalHeader>
@@ -598,13 +598,13 @@ const CustomerFeedback = () => {
 
     return (
         <Box minHeight="30vh" width="100%" maxW="1200px" mx="auto" my={20} px={4} textAlign="center">
-            <Text fontSize="4xl" fontWeight="bold" mb={4}>Customer Feedback</Text>
-            <Text fontSize="lg" mb={10}>What our customers are saying</Text>
+            <Text fontSize="2xl" fontWeight="bold" mb={4}>Customer Feedback</Text>
+            <Text fontSize="sm" mb={10}>What our customers are saying</Text>
             <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10}>
                 {feedbacks.map((feedback, index) => (
                     <>
                         <Box key={index} p={5}>
-                            <Text fontWeight="bold" fontSize="xl" mb={10}>{feedback.name}</Text>
+                            <Text fontWeight="bold" fontSize="lg" mb={10}>{feedback.name}</Text>
                             <Text>{feedback.review}</Text>
                         </Box>
                         <Box mt={10}>
@@ -619,7 +619,7 @@ const CustomerFeedback = () => {
 
 const FAQSection = forwardRef((props, ref) => (
     <Box ref={ref} width="100%" maxW="1200px" mx="auto" mt={20} px={4}>
-        <Text fontSize="4xl" fontWeight="bold" mb={20} textAlign="center">Frequently Asked Questions</Text>
+        <Text fontSize="2xl" fontWeight="bold" mb={20} textAlign="center">Frequently Asked Questions</Text>
             <Accordion allowToggle>
                 <AccordionItem>
                     <h2>
@@ -712,14 +712,14 @@ const InformationSection = ({ faqRef, purchaseOrValidateRef }) => {
                     </VStack>
                 </Box>
                 <VStack spacing={4} align="stretch">
-                    <Text fontSize="xl" fontWeight="bold">Explore</Text>
+                    <Text fontSize="lg" fontWeight="bold">Explore</Text>
                     <Text cursor="pointer" _hover={{ color: "blue.500" }}>About</Text>
                     <Text cursor="pointer" _hover={{ color: "blue.500" }}>Contact</Text>
                     <Text cursor="pointer" _hover={{ color: "blue.500" }} onClick={scrollToFAQ}>FAQ's</Text>
                     <Text cursor="pointer" _hover={{ color: "blue.500" }}>Privacy Policy</Text>
                 </VStack>
                 <VStack spacing={4} align="stretch">
-                    <Text fontSize="xl" fontWeight="bold">Actions</Text>
+                    <Text fontSize="lg" fontWeight="bold">Actions</Text>
                     <Text cursor="pointer" _hover={{ color: "blue.500" }} onClick={scrollToPurchaseOrValidate}>Buy Card</Text>
                     <Text cursor="pointer" _hover={{ color: "blue.500" }} onClick={scrollToPurchaseOrValidate}>Validate Card</Text>
                 </VStack>

@@ -13,7 +13,7 @@ export default function Navbar({ informationSectionRef }) {
     return (
         <nav className="nav">
             <Link to="/" className="site-title">
-                <Text fontSize={`2xl`}>
+                <Text fontSize={`lg`}>
                     Active Gift Card Validator
                 </Text>
             </Link>

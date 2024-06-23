@@ -9,8 +9,8 @@ import { ChakraProvider, extendTheme } from '@chakra-ui/react';
 import { Analytics } from '@vercel/analytics/react';
 
 const fonts = {
-  body: "Merriweather, serif",
-  heading: "Merriweather, serif",
+  body: "Basic, sans-serif",
+  heading: "Basic, sans-serif",
 }
 
 const theme = extendTheme({fonts})
