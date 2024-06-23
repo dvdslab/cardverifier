@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import { sendToVercelAnalytics } from './vitals';
 import { BrowserRouter } from 'react-router-dom';
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
+import { Analytics } from '@vercel/analytics/react';
 
 const fonts = {
   body: "Merriweather, serif",
@@ -18,7 +19,8 @@ ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
       <ChakraProvider theme={theme}>
-         <App />
+        <App />
+        <Analytics />
      </ChakraProvider>
     </BrowserRouter>
   </React.StrictMode>,
