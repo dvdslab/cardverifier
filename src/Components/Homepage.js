@@ -586,7 +586,7 @@ function PurchaseOrValidate() {
                             )}
                             </ModalBody>
                             <ModalFooter>
-                                {isUploadMode ?? (<Button colorScheme="white" variant={`outline`} mr={3} type="submit" isLoading={loading} spinnerPlacement='start'>
+                                {isUploadMode = true ?? (<Button colorScheme="white" variant={`outline`} mr={3} type="submit" isLoading={loading} spinnerPlacement='start'>
                                     Validate
                                 </Button>)}
                                 <Button variant="outline" colorScheme="blue" onClick={handleToggleUploadMode}>
