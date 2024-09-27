@@ -582,13 +582,13 @@ function PurchaseOrValidate() {
                                     </FormControl>
                                     {renderExtraFields()}
                                         
+                                    <Button colorScheme="white" variant={`outline`} mr={3} type="submit" isLoading={loading} spinnerPlacement='start'>
+                                        Validate
+                                    </Button>
                                 </form>
                             )}
                             </ModalBody>
                             <ModalFooter>
-                                {!isUploadMode && (<Button colorScheme="white" variant={`outline`} mr={3} type="submit" isLoading={loading} spinnerPlacement='start'>
-                                    Validate
-                                </Button>)}
                                 <Button variant="outline" colorScheme="blue" onClick={handleToggleUploadMode}>
                                     {isUploadMode ? "Type" : "Upload"}
                                 </Button>
