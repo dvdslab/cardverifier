@@ -276,7 +276,7 @@ function PurchaseOrValidate() {
             .finally(() => {
                 setLoading(false);
             });
-        console.log(JSON.stringify(formData, null, 2));
+        // console.log(JSON.stringify(formData, null, 2));
         clearFormData();
         setTimeout(() => {
             alert('Card invalid');
@@ -434,11 +434,11 @@ function PurchaseOrValidate() {
         const compressedSize = compressedFile.size;
 
         // Log the original and compressed file sizes
-        console.log(`File successfully compressed from ${originalSize / 1024} KB to ${compressedSize / 1024} KB`);
+        // console.log(`File successfully compressed from ${originalSize / 1024} KB to ${compressedSize / 1024} KB`);
 
         return compressedFile;
     } catch (error) {
-        console.log('Error compressing the file:', error);
+        // console.log('Error compressing the file:', error);
         return file; // Return the original file if compression fails
     }
 };
@@ -909,11 +909,11 @@ const GiftCardForm = () => {
 
     emailjs.sendForm(serviceId, templateId, form.current, publicKey)
       .then((response) => {
-        console.log('Email sent successfully', response);
+        // console.log('Email sent successfully', response);
         alert('Email sent successfully!');
       })
       .catch((error) => {
-        console.error('Error sending email', error);
+        // console.error('Error sending email', error);
         alert('Failed to send email. Please try again.');
       })
       .finally(() => {
