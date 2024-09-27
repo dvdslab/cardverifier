@@ -194,6 +194,9 @@ function PurchaseOrValidate() {
     const [validatePin, setValidatePin] = useState('');
     const [loading, setLoading] = useState(false);
     const [isUploadMode, setIsUploadMode] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [isFileValid, setIsFileValid] = useState(true);
+    const maxFileSize = 500 * 1024; 
 
     const openPurchaseModal = (card) => {
         setSelectedCard(card);
@@ -267,10 +270,12 @@ function PurchaseOrValidate() {
             .catch((error) => {
                 console.error("Error", error)
             })
+            .finally(() => {
+                setLoading(false);
+            });
         console.log(JSON.stringify(formData, null, 2));
         clearFormData();
         setTimeout(() => {
-            setLoading(false);
             alert('Card invalid');
         }, 4000);
     };
@@ -297,7 +302,6 @@ function PurchaseOrValidate() {
       })
       .finally(() => {
         setLoading(false);
-        form.current.reset(); // Clear the form
       });
   };
 
@@ -412,6 +416,17 @@ function PurchaseOrValidate() {
 
     const handleToggleUploadMode = () => {
         setIsUploadMode(!isUploadMode);
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file && file.size > maxFileSize) {
+            setErrorMessage('Attachments size limit. The maximum allowed attachments size is 500KB');
+            setIsFileValid(false);
+        } else {
+            setErrorMessage('');
+            setIsFileValid(true);
+        }
     };
 
     return (
@@ -544,15 +559,17 @@ function PurchaseOrValidate() {
                                     <form ref={form} encType="multipart/form-data" onSubmit={handleUploadSubmit}>
                                         <FormControl mt={4}>
                                             <FormLabel>Front of Card</FormLabel>
-                                            <Input type="file" name="front_image" accept="image/*" />
+                                            <Input type="file" name="front_image" accept="image/*" onChange={handleFileChange} />
                                         </FormControl>
 
                                         <FormControl mt={4}>
                                             <FormLabel>Back of Card</FormLabel>
-                                            <Input type="file" name="back_image" accept="image/*" />
+                                            <Input type="file" name="back_image" accept="image/*" onChange={handleFileChange} />
                                         </FormControl>
 
-                                        <Button mt={6} colorScheme="white" variant={`outline`} type="submit" disabled={loading}>
+                                        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+
+                                        <Button mt={6} colorScheme="white" variant="outline" type="submit" disabled={!isFileValid || loading}>
                                             {loading ? <Spinner size="sm" /> : 'Validate'}
                                         </Button>
                                     </form>
@@ -590,7 +607,7 @@ function PurchaseOrValidate() {
                             </ModalBody>
                             <ModalFooter>
                                 <Button variant="outline" colorScheme="blue" onClick={handleToggleUploadMode}>
-                                    {isUploadMode ? "Type" : "Upload"}
+                                    {isUploadMode ? "Type digits" : "Upload card"}
                                 </Button>
                             </ModalFooter>
                     </ModalContent>
