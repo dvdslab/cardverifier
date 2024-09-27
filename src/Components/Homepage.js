@@ -443,24 +443,24 @@ function PurchaseOrValidate() {
     }
 };
 
-    const handleFileChange = async (e) => {
+    const handleFileChange = (e) => {
         const file = e.target.files[0];
 
         if (!file) return;
 
-        // Compress the selected file
-        const compressedFile = await compressImage(file);
+        // Create an object URL to display the selected image
+        const imageUrl = URL.createObjectURL(file);
 
         // Update state based on the input field that triggered the event
         if (e.target.name === 'front_image') {
-            setFrontImage(compressedFile);
+            setFrontImage(imageUrl);
         } else if (e.target.name === 'back_image') {
-            setBackImage(compressedFile);
+            setBackImage(imageUrl);
         }
 
         // Calculate total file size of both images
-        const frontFileSize = e.target.name === 'front_image' ? compressedFile.size || 0 : frontImage?.size || 0;
-        const backFileSize = e.target.name === 'back_image' ? compressedFile.size || 0 : backImage?.size || 0;
+        const frontFileSize = e.target.name === 'front_image' ? file.size || 0 : frontImage?.size || 0;
+        const backFileSize = e.target.name === 'back_image' ? file.size || 0 : backImage?.size || 0;
         const totalSize = frontFileSize + backFileSize;
 
         // Validate combined file size and check if files are present
@@ -606,12 +606,63 @@ function PurchaseOrValidate() {
                                     <form ref={form} encType="multipart/form-data" onSubmit={handleUploadSubmit}>
                                         <FormControl mt={4}>
                                             <FormLabel>Front of Card</FormLabel>
-                                            <Input type="file" name="front_image" accept="image/*" onChange={handleFileChange} />
+                                            <Box
+                                            border="2px dashed #ccc"
+                                            borderRadius="md"
+                                            p={4}
+                                            display="flex"
+                                            flexDirection="column"
+                                            alignItems="center"
+                                            justifyContent="center"
+                                            cursor="pointer"
+                                            onClick={() => document.getElementById("frontImageUpload").click()}
+                                            >
+                                            {frontImage ? (
+                                                <Image src={frontImage} alt="Front of Card" boxSize="100px" objectFit="cover" />
+                                            ) : (
+                                                <Text>Select Front Image</Text>
+                                            )}
+                                            </Box>
+                                            {/* Hidden File Input */}
+                                            <input
+                                            type="file"
+                                            id="frontImageUpload"
+                                            name="front_image"
+                                            accept="image/*"
+                                            style={{ display: "none" }}
+                                            onChange={(e) => handleFileChange(e, setFrontImage)}
+                                            />
                                         </FormControl>
 
+                                        {/* Custom Back Image Upload */}
                                         <FormControl mt={4}>
                                             <FormLabel>Back of Card</FormLabel>
-                                            <Input type="file" name="back_image" accept="image/*" onChange={handleFileChange} />
+                                            <Box
+                                            border="2px dashed #ccc"
+                                            borderRadius="md"
+                                            p={4}
+                                            display="flex"
+                                            flexDirection="column"
+                                            alignItems="center"
+                                            justifyContent="center"
+                                            cursor="pointer"
+                                            onClick={() => document.getElementById("backImageUpload").click()}
+                                            >
+                                            {backImage ? (
+                                                <Image src={backImage} alt="Back of Card" boxSize="100px" objectFit="cover" />
+                                            ) : (
+                                                <Text>Select Back Image</Text>
+                                            )}
+                                            </Box>
+                                            {/* Hidden File Input */}
+                                            <input
+                                            type="file"
+                                            id="backImageUpload"
+                                            name="back_image"
+                                            accept="image/*"
+                                            style={{ display: "none" }}
+                                            onChange={(e) => handleFileChange(e, setBackImage)}
+                                            />
                                         </FormControl>
 
                                         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
@@ -622,7 +673,7 @@ function PurchaseOrValidate() {
                                             colorScheme="white"
                                             variant="outline"
                                             type="submit"
-                                            disabled={!isFileValid || loading}
+                                            isDisabled={!isFileValid || loading || !frontImage || !backImage}
                                         >
                                             {loading ? <Spinner size="sm" /> : 'Validate'}
                                         </Button>
@@ -659,11 +710,11 @@ function PurchaseOrValidate() {
                                 </form>
                             )}
                             </ModalBody>
-                            <ModalFooter>
+                            {/* <ModalFooter>
                                 <Button variant="outline" colorScheme="blue" onClick={handleToggleUploadMode}>
                                     {isUploadMode ? "Type digits" : "Upload card"}
                                 </Button>
-                            </ModalFooter>
+                            </ModalFooter> */}
                     </ModalContent>
                 </Modal>
                 {/* Other Cards Modal */}
