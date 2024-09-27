@@ -615,6 +615,7 @@ function PurchaseOrValidate() {
                                         </FormControl>
 
                                         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+                                        <p style={{ fontSize: '12px' }}>Info: max size of file is 250kb</p>
 
                                         <Button
                                             mt={6}
