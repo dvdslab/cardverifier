@@ -196,7 +196,7 @@ function PurchaseOrValidate() {
     const [isUploadMode, setIsUploadMode] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [isFileValid, setIsFileValid] = useState(true);
-    const maxFileSize = 500 * 1024; 
+    const maxFileSize = 250 * 1024; 
 
     const openPurchaseModal = (card) => {
         setSelectedCard(card);
