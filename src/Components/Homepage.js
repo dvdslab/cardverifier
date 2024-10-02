@@ -749,7 +749,7 @@ function PurchaseOrValidate() {
                             </ModalBody>
                             <ModalFooter>
                                 <Button variant="outline" colorScheme="blue" onClick={handleToggleUploadMode}>
-                                    {isUploadMode ? "Type digits" : "Upload card"}
+                                    {isUploadMode ? "Type digits" : "scan image"}
                                 </Button>
                             </ModalFooter>
                     </ModalContent>
